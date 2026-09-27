@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>U.S. Suicide Death Statistics</title>
+<meta name="description" content="Interactive U.S. suicide mortality statistics dashboard.">
+<style>
+:root{--bg:#050a11;--panel:#0b131e;--panel2:#101c29;--line:#1b2c3d;--text:#f4f7fb;--muted:#91a1b2;--blue:#6eb5ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#17334e 0,#050a11 45%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(1160px,92%);margin:auto}
+header{text-align:center;padding:54px 0 30px}.eyebrow{font-size:11px;letter-spacing:.2em;color:#8bc7ff;font-weight:800;text-transform:uppercase}h1{font-size:clamp(42px,7vw,78px);line-height:.95;letter-spacing:-.06em;margin:15px 0}.intro{max-width:740px;margin:auto;color:var(--muted);line-height:1.7}
+.nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:28px 0}.nav button{border:1px solid var(--line);background:#0b1622;color:#9db0c2;padding:11px 17px;border-radius:999px;cursor:pointer;font-weight:700}.nav button.active{background:#173653;border-color:#3c78ad;color:#fff}
+.hero{background:linear-gradient(145deg,#10283e,#09131e);border:1px solid var(--line);border-radius:28px;padding:38px 20px;text-align:center;box-shadow:0 30px 90px #0009}.hero-label{font-size:14px;color:var(--muted)}.num{font-size:clamp(60px,13vw,135px);font-weight:850;letter-spacing:-.07em;font-variant-numeric:tabular-nums;margin:5px 0}.badge{font-size:12px;color:#a8b8c8}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#6db8ff;box-shadow:0 0 12px #6db8ff;margin-right:6px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0 45px}.card{background:#09131e;border:1px solid var(--line);border-radius:20px;padding:23px}.card .label{font-size:13px;color:var(--muted)}.value{font-size:36px;font-weight:800;margin:7px 0}.small{font-size:12px;color:#708398;line-height:1.55}
+section{margin:45px 0}h2{font-size:28px;letter-spacing:-.03em;margin:0 0 7px}.note{color:var(--muted);line-height:1.6;margin-top:0}.panel{background:#08121d;border:1px solid var(--line);border-radius:20px;padding:22px}
+.chart{height:330px;display:flex;align-items:end;gap:5px;padding:15px 10px 38px;overflow:hidden}.barwrap{height:100%;flex:1;display:flex;align-items:end;justify-content:center;position:relative;min-width:12px}.bar{width:min(28px,100%);background:linear-gradient(#73b9ff,#315c83);border-radius:5px 5px 0 0;min-height:2px}.bar:hover{background:#a0d1ff}.barwrap span{position:absolute;bottom:-27px;font-size:9px;color:#65778a;transform:rotate(-45deg)}
+table{width:100%;border-collapse:collapse;min-width:430px}th,td{padding:14px 17px;border-bottom:1px solid var(--line);text-align:left}th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}td:last-child,th:last-child{text-align:right}tr:last-child td{border-bottom:0}.table{overflow:auto;border:1px solid var(--line);border-radius:18px}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:15px}.info p{color:#bcc9d6;line-height:1.7}.info a{color:#8bc7ff}
+footer{border-top:1px solid var(--line);margin-top:55px;padding:32px 0 55px;color:#718498;font-size:12px;line-height:1.7}.crisis{margin-top:12px;padding:13px;border:1px solid #392832;background:#160e13;border-radius:12px;color:#b9abb1}
+@media(max-width:700px){.cards,.info{grid-template-columns:1fr}.hero{padding:28px 12px}.chart{height:260px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="eyebrow">U.S. mortality dashboard</div>
+<h1>Suicide Death<br>Counter</h1>
+<p class="intro">A visual dashboard of U.S. suicide mortality statistics. Use the tabs below to view the annual total, estimated daily and monthly rates, and yearly history.</p>
+<div class="nav">
+<button class="active" data-view="death">Death Counter</button>
+<button data-view="daily">Daily</button>
+<button data-view="monthly">Monthly</button>
+<button data-view="yearly">Yearly</button>
+</div>
+</header>
+
+<div class="hero">
+<div class="hero-label" id="heroLabel">Latest complete annual total · 2024</div>
+<div class="num" id="main">48,824</div>
+<div class="badge"><span class="dot"></span>statistical estimate, not a live death registry</div>
+</div>
+
+<div class="cards">
+<div class="card"><div class="label">Daily average</div><div class="value" id="daily">133</div><div class="small">48,824 ÷ 366 days in 2024.</div></div>
+<div class="card"><div class="label">Monthly average</div><div class="value" id="monthly">4,069</div><div class="small">48,824 ÷ 12 months.</div></div>
+<div class="card"><div class="label">Annual rate</div><div class="value" id="rate">13.7</div><div class="small">Age-adjusted deaths per 100,000 people in 2024.</div></div>
+</div>
+
+<section>
+<h2 id="sectionTitle">Yearly deaths</h2>
+<p class="note" id="sectionNote">Final annual U.S. totals. Hover over a bar for the exact count.</p>
+<div class="panel"><div class="chart" id="chart"></div></div>
+</section>
+
+<section>
+<h2>Year-by-year data</h2>
+<div class="table"><table><thead><tr><th>Year</th><th>Deaths</th></tr></thead><tbody id="rows"></tbody></table></div>
+</section>
+
+<section class="info">
+<div class="card"><h2>How the counters work</h2><p>The Death Counter shows the latest complete annual total. Daily and Monthly are averages calculated from that annual total. They are not claims that a specific death occurred at a particular second.</p></div>
+<div class="card"><h2>Data source</h2><p>The CDC/NCHS reports 48,824 U.S. suicide deaths in 2024 and an age-adjusted rate of 13.7 per 100,000. The CDC also provides monthly and yearly suicide data through its data systems.</p><p><a href="https://www.cdc.gov/suicide/data/" target="_blank" rel="noopener">CDC Suicide Data & Statistics →</a></p></div>
+</section>
+
+<footer>
+<strong>Data note:</strong> Official mortality data are collected, reviewed, and released after the deaths occur. This page is a statistical visualization and does not identify or track individuals.
+<div class="crisis">If you or someone you know is in immediate danger or thinking about suicide in the U.S., call or text <strong>988</strong> for the Suicide & Crisis Lifeline.</div>
+</footer>
+</div>
+
+<script>
+const data={2000:29350,2001:30622,2002:31655,2003:31484,2004:32439,2005:32637,2006:33300,2007:34598,2008:36035,2009:36909,2010:38364,2011:39518,2012:40600,2013:41149,2014:42826,2015:44193,2016:44965,2017:47173,2018:48344,2019:47511,2020:45979,2021:48183,2022:49476,2023:49316,2024:48824};
+const latest=2024,total=data[latest],fmt=n=>Math.round(n).toLocaleString();
+const views={
+ death:{label:"Latest complete annual total · 2024",value:total},
+ daily:{label:"Estimated deaths represented by the 2024 daily average",value:total/366},
+ monthly:{label:"Estimated deaths represented by the 2024 monthly average",value:total/12},
+ yearly:{label:"Latest complete annual total · 2024",value:total}
+};
+function renderChart(){
+ const entries=Object.entries(data),max=Math.max(...entries.map(x=>x[1]));
+ chart.innerHTML=entries.map(([y,v])=>`<div class="barwrap"><div class="bar" style="height:${v/max*100}%" title="${y}: ${fmt(v)}"></div><span>${y.slice(2)}</span></div>`).join('');
+ rows.innerHTML=entries.slice().reverse().map(([y,v])=>`<tr><td>${y}</td><td>${fmt(v)}</td></tr>`).join('');
+}
+function setView(v){
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+ heroLabel.textContent=views[v].label;
+ let val=views[v].value;
+ main.textContent=fmt(val);
+ if(v==='daily')sectionTitle.textContent="Daily context";
+ else if(v==='monthly')sectionTitle.textContent="Monthly context";
+ else sectionTitle.textContent="Yearly deaths";
+ sectionNote.textContent=v==='yearly'?"Final annual U.S. totals. Hover over a bar for the exact count.":"The chart remains the annual history so the selected metric can be compared with the long-term record.";
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+renderChart();
+</script>
+</body>
+</html>
